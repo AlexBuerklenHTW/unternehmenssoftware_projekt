@@ -3,80 +3,61 @@ import openai
 file_path = "API_KEY"
 openai.api_key = open(file_path, "r").read()
 
-## Code below is basically chatGPT, but in code
 
-# chat_log = []
-#
-# while True:
-#     user_message = input()
-#     if user_message.lower() == "quit":
-#         break
-#     else:
-#         chat_log.append({"role": "user", "content": user_message})
-#         response = openai.ChatCompletion.create(
-#             model="gpt-3.5-turbo",
-#             messages=chat_log
-#         )
-#         assistant_response = response['choices'][0]['message']['content']
-#         print("ChatGPT:", assistant_response.strip("\n").strip())
-#         chat_log.append({"role": "user", "content": assistant_response.strip("\n").strip()})
-
-## Code below shows, that it is not possible to create a "biased" response, since OpenaAI is trying to avoid biased responses
-
-# response = openai.ChatCompletion.create(
-#     model="gpt-3.5-turbo",
-#     messages=[
-#         {"role": "system", "content": "You only like Apple products"},
-#         {"role": "user", "content": "Do you recommend apple products or samsung products?"}
-#     ]
-# )
-# print(response)
-
-
-## Code below sets a context with the role set to "system".
-
-# chat_agent_seller = [{"role": "system", "content": "You are a seller of a phone. The price of the phone is 800€."}]
-# chat_agent_buyer = [{"role": "system", "content": "You are a buyer of a phone. You want to buy it for 600€"}]
-# chat_response_seller = [{"role": "assistant", "content": ""}]
-# chat_response_buyer = [{"role": "assistant", "content": ""}]
-#
-# response = openai.ChatCompletion.create(
-#     model="gpt-3.5-turbo",
-#     messages=[{"role": "system", "content": "You are a seller of a phone. The price of the phone is 800€."}]
-# )
-# final_response = response['choices'][0]['message']['content']
-# print("ChatGPT:", final_response.strip())
-
-
-# Define the conversation where the user provides a topic, and both assistants discuss it back and forth five times
-conversation = [
-    {"role": "user", "content": "Let's discuss the impact of artificial intelligence on society."}
-]
-
-# Function to send a message to the API
-def send_message(messages):
+## Simple conversation. Topic: Paul wants to sell his Iphone and Sarah is a potential buyer.
+def buyer_and_seller_1():
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
-        messages=messages
+        messages=[
+            {"role": "user",
+             "content": "Paul and Sarah are going to have a conversation, that needs to end up with a deal."},
+            {"role": "assistant",
+             "content": "You take the role of a seller (name: Paul). You have a used Iphone 13, that you want to sell for 700€. You are ready to negotiate, but not under 500€."},
+            {"role": "assistant",
+             "content": "You take the role of a buyer (name: Sarah). You are interested in the Iphone 13. You have a budget of 600€. You want to negotiate down to 550€, but would take the Iphone 13 for 600€."}
+        ]
     )
-    return response['choices'][0]['message']['content']
+    print(response['choices'][0]['message']['content'])
 
-# Number of back-and-forth exchanges
-num_exchanges = 5
+##response:
+# Paul: Hi Sarah, I heard you're interested in buying the used Iphone 13 I have for sale.
+#
+# Sarah: Hi Paul, yes, I'm definitely interested in purchasing the Iphone 13. However, I have a budget of 600€. Is there any possibility of negotiating the price?
+#
+# Paul: I understand your budget, but I was initially looking to sell it for 700€. However, I am willing to negotiate. How about meeting in the middle at 650€?
+#
+# Sarah: I appreciate your willingness to negotiate, Paul. However, my budget is quite firm at 600€. Would you consider selling it to me for that price?
+#
+# Paul: I understand your budget limitations, Sarah. Let's find a middle ground. How about 625€? That way, we both compromise a bit.
+#
+# Sarah: I appreciate your effort to meet halfway, Paul. However, I'm afraid my maximum budget is still 600€. Is there any way you could consider selling it for that price?
+#
+# Paul: Alright, Sarah. I can see that you really want the Iphone 13, and I'm willing to work with you on this. Since you seem really interested, I can agree to sell it to you for 600€.
+#
+# Sarah: Thank you, Paul! I'm glad we were able to come to an agreement. I accept your offer of 600€ for the Iphone 13.
+#
+# Paul: Fantastic, Sarah! I'm glad we were able to reach a deal. The Iphone 13 is now yours for 600€. I'll make sure it's properly packaged for you.
+#
+# Sarah: Great! I appreciate your cooperation, Paul. Can we arrange a convenient time and place for the transaction?
+#
+# Paul: Absolutely, Sarah. Let's organize a time and place that works for both of us. Shall we meet tomorrow afternoon at the local coffee shop at 4 pm?
+#
+# Sarah: That sounds perfect, Paul. I'll see you at the coffee shop tomorrow at 4 pm. Looking forward to completing the transaction.
+#
+# Paul: Excellent, Sarah. I'll be there, ready to hand over the Iphone 13 to you at 4 pm. See you then!
+#
+# Sarah: Thank you, Paul. See you tomorrow!
 
-for _ in range(num_exchanges):
-    # Assistant 1 responds
-    assistant1_response = send_message(conversation + [{"role": "assistant", "content": "Assistant 1, what are your thoughts on the topic?"}])
-    conversation.append({"role": "assistant", "content": assistant1_response})
-
-    # Assistant 2 responds
-    assistant2_response = send_message(conversation + [{"role": "assistant", "content": "Assistant 2, please share your insights as well."}])
-    conversation.append({"role": "assistant", "content": assistant2_response})
-
-    # Print the conversation
-    print("User:", conversation[0]["content"])
-    for i in range(1, len(conversation), 2):
-        print(f"Assistant 1: {conversation[i]['content']}")
-        print(f"Assistant 2: {conversation[i + 1]['content']}\n")
-
-
+def buyer_and_seller_2():
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "user",
+             "content": "Paul and Sarah are going to have a conversation, that needs to end up with a deal."},
+            {"role": "assistant",
+             "content": "You take the role of a seller (name: Paul). You have a used Iphone 13, that you want to sell for 700€. You are ready to negotiate, but not under 500€."},
+            {"role": "assistant",
+             "content": "You take the role of a buyer (name: Sarah). You are interested in the Iphone 13. You have a budget of 600€. You want to negotiate down to 550€, but would take the Iphone 13 for 600€."}
+        ]
+    )
+    print(response['choices'][0]['message']['content'])

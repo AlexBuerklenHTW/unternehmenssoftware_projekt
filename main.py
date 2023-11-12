@@ -12,7 +12,7 @@ def buyer_and_seller():
             {"role": "user",
              "content": "Paul and Sarah are going to have a conversation, that needs to end up with a deal."},
             {"role": "assistant",
-             "content": "You take the role of a seller (name: Paul). You have a1 used Iphone 3, that you want to sell for 700€. You are ready to negotiate, but not under 500€."},
+             "content": "You take the role of a seller (name: Paul). You have a used Iphone 13, that you want to sell for 700€. You are ready to negotiate, but not under 500€."},
             {"role": "assistant",
              "content": "You take the role of a buyer (name: Sarah). You are interested in the Iphone 13. You have a budget of 600€. You want to negotiate down to 550€, but would take the Iphone 13 for 600€."}
         ]

@@ -2,13 +2,13 @@ import openai
 
 
 ## Topic (buyer and seller): Paul wants to sell his Iphone and Sarah is a potential buyer.
+# bas = buyer and seller
+# sbp = step back prompting
 
-def buyer_and_seller():
+def bas_assistant():
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
-            {"role": "user",
-             "content": "Paul and Sarah are going to have a conversation, that needs to end up with a deal."},
             {"role": "assistant",
              "content": "You take the role of a seller (name: Paul). You have a used Iphone 13, that you want to sell for 700€. You are ready to negotiate, but not under 500€."},
             {"role": "assistant",
@@ -18,8 +18,49 @@ def buyer_and_seller():
     print(response['choices'][0]['message']['content'])
 
 
-def buyer_and_seller_evaluator():
-    first_run = """1st run:"
+def bas_user():
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "user",
+             "content": "You take the role of a seller (name: Paul). You have a used Iphone 13, that you want to sell for 700€. You are ready to negotiate, but not under 500€."},
+            {"role": "user",
+             "content": "You take the role of a buyer (name: Sarah). You are interested in the Iphone 13. You have a budget of 600€. You want to negotiate down to 550€, but would take the Iphone 13 for 600€."}
+        ]
+    )
+    print(response['choices'][0]['message']['content'])
+
+
+def bas_system():
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system",
+             "content": "You take the role of a seller (name: Paul). You have a used Iphone 13, that you want to sell for 700€. You are ready to negotiate, but not under 500€."},
+            {"role": "system",
+             "content": "You take the role of a buyer (name: Sarah). You are interested in the Iphone 13. You have a budget of 600€. You want to negotiate down to 550€, but would take the Iphone 13 for 600€."}
+        ]
+    )
+    print(response['choices'][0]['message']['content'])
+
+
+def bas_sbp():
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system",
+             "content": "Generate a conversation based on the two assistants. Before you generate them, list what are the best strategies for buyer and sellers?"},
+            {"role": "assistant",
+             "content": "You take the role of a seller (name: Paul). You have a used Iphone 13, that you want to sell for 700€. You are ready to negotiate, but not under 500€."},
+            {"role": "assistant",
+             "content": "You take the role of a buyer (name: Sarah). You are interested in the Iphone 13. You have a budget of 600€. You want to negotiate down to 550€, but would take the Iphone 13 for 600€."}
+        ]
+    )
+    print(response['choices'][0]['message']['content'])
+
+
+def bas_evaluator():
+    first_run_bas = """1st run:"
                  "Paul: Hi Sarah, I heard you're interested in buying the used Iphone 13 I have for sale."
                  "Sarah: Hi Paul, yes, I'm definitely interested in purchasing the Iphone 13. However, I have a budget of 600€. Is there any possibility of negotiating the price?"
                  "Paul: I understand your budget, but I was initially looking to sell it for 700€. However, I am willing to negotiate. How about meeting in the middle at 650€?"
@@ -34,8 +75,8 @@ def buyer_and_seller_evaluator():
                  "Sarah: That sounds perfect, Paul. I'll see you at the coffee shop tomorrow at 4 pm. Looking forward to completing the transaction."
                  "Paul: Excellent, Sarah. I'll be there, ready to hand over the Iphone 13 to you at 4 pm. See you then!"
                  "Sarah: Thank you, Paul. See you tomorrow!"""
-    second_run = """2nd run:"
-                  "Paul: Hi Sarah, I heard you're looking for an Iphone 13. I happen to have a used one that I'm looking to sell. Are you interested?)"
+    second_run_bas = """2nd run:"
+                  "Paul: Hi Sarah, I heard you're looking for an Iphone 13. I happen to have a used one that I'm looking to sell. Are you interested?"
                   "Sarah: Yes, I am. I've been searching for a good deal on an Iphone 13. How much are you asking for it?"
                   "Paul: I'm looking to sell it for 700€. It's in great condition and still functions perfectly. However, I am open to negotiations. What's your budget?"
                   "Sarah: My budget is around 600€. I understand that it's a used phone, so I believe that price is fair. Would you consider selling it for 600€?"
@@ -44,7 +85,7 @@ def buyer_and_seller_evaluator():
                   "Paul: Thank you for the compromise, Sarah. I do believe the phone is worth more, but I am willing to meet you halfway. If you can agree to 575€, then we have a deal."
                   "Sarah: 575€ is a bit higher than my initial budget, but I think I can make that work. I appreciate your flexibility, Paul. Let's make it a deal."
                   "Paul: Great! I'm glad we were able to reach an agreement. The Iphone 13 is yours for 575€. I'll make sure to prepare it for you and we can arrange a time for the exchange."""
-    third_run = """3rd run:"
+    third_run_bas = """3rd run:"
                  "Paul: Hi Sarah! I heard you're interested in purchasing an iPhone 13. I have a used one available for sale. How can I assist you?"
                  "Sarah: Hi Paul! Yes, I've been looking for an iPhone 13 at a reasonable price. Can you tell me more about the condition of the phone and the price you're asking for it?"
                  "Paul: Certainly! The iPhone 13 I have is in great condition, with no major scratches or dents. It has been well-maintained and functions perfectly. As for the price, I'm looking to sell it for 700€. However, I am open to negotiation."
@@ -58,14 +99,14 @@ def buyer_and_seller_evaluator():
                  "Paul: Fantastic! I'm glad we were able to come to an agreement. We can arrange the payment and delivery details to suit both our convenience. Thank you for your cooperation, Sarah!"
                  "Sarah: Likewise, Paul! I'm looking forward to completing this transaction smoothly. Thank you for your understanding and flexibility."""
 
-
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
             {"role": "system",
-             "content": "You are gonna be the evaluator of three different responses generated by yourself. The topic is: Paul and Sarah are going to have a conversation, that needs to end up with a deal."
-                        "Rate on a scale from 1 to 10 (1 being a boring conversation and 10 super interesting) how interesting this conversation was."},
-            {"role": "user", "content": first_run}
+             "content": "Evaluator's frame: You are gonna be the evaluator of responses generated by yourself. The topic is: Paul and Sarah are going to have a conversation, that needs to end up with a deal."
+                        "Rate on a scale from 1 to 0 (1 being a boring conversation and 10 super interesting) how interesting this conversation was. Example: 1 could be if the conversation had no emotions and very dry."
+                        "10 would be if the conversation is really catching and full of emotions."},
+            {"role": "user", "content": third_run_bas}
         ]
     )
     print(response['choices'][0]['message']['content'])

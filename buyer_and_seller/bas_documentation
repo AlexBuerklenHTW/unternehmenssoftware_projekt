@@ -1,0 +1,17 @@
+1.)
+Der erste Run kommt mir ziemlich dry vor. Sarah hat keine Details zu dem Handy nachgefragt und ist sofort richtung
+Verhandlung gegangen. Paul hat keine Details über das Handy gegeben und ist sofort in die Verhandlung gesprungen. Im
+zweiten Run hat Paul kurz beschrieben, in welchem Zustand sich das Handy befindet. Sarah hat auch angefangen,
+bessere Argumente zu finden, um den Preis zu drücken. Im dritten Run hat Sarah damit gestartet, sich über den Zustand
+des Handys zu informieren. Auch hat Sarah "Versprechungen" gegeben, dass Sie nicht über mehr budget verfügt. Die Frage
+ist nur, ob das reiner Zufall ist oder ob GPT bessere Antworten gibt, desto mehr Run's man macht. Ausgehend von der
+Dokumentation, soll die "assistant" Rolle die Antworten der vorherigen "assistant" speichern und darauf einen Kontext
+bilden.
+
+2.)
+Es scheint, dass es keinen großen Unterschied macht, welche Rollen man setzt (Beispiele in "bas_difference_roles")
+Was mir aber aufgefallen ist, dass die Konversation der "system" Rolle "menschlicher" ist.
+
+3.)
+Wenn man Beispiele zu den Skalen in dem Prompt hinzufügt, werden die Konversationen anders bewertet (Beispiele in
+"bas_evaluator_1 bis -//-_4")

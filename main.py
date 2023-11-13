@@ -1,6 +1,6 @@
 import openai
 
-import buyer_and_seller
+import buyer_and_seller.buyer_and_seller
 
 file_path = "API_KEY"
 openai.api_key = open(file_path, "r").read()
@@ -21,3 +21,4 @@ openai.api_key = open(file_path, "r").read()
 # optionale tags reserchieren (z.B.: seed)
 # zwei extremen gegeneinander laufen lassen
 
+bas = buyer_and_seller.buyer_and_seller.bas_evaluator()

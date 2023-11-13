@@ -14,6 +14,11 @@ openai.api_key = open(file_path, "r").read()
 # Allow user feedback/input
 # Goal could be to generate as deep conversations as possible (evaluation via LLM)
 
+# step-back-prompting
+# beispiele geben für skalen
+# optionale tags reserchieren (z.B.: seed)
+# zwei extremen gegeneinander laufen lassen
+
 
 
 ## Topic (buyer_and_seller): Paul wants to sell his Iphone and Sarah is a potential buyer.

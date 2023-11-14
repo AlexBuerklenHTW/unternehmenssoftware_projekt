@@ -13,5 +13,5 @@ Es scheint, dass es keinen großen Unterschied macht, welche Rollen man setzt (B
 Was mir aber aufgefallen ist, dass die Konversation der "system" Rolle "menschlicher" ist.
 
 3.)
-Wenn man Beispiele zu den Skalen in dem Prompt hinzufügt, werden die Konversationen anders bewertet (Beispiele in
+Wenn man Beispiele zu den Skalen in dem Prompt hinzufügt, werden die Konversationen leicht anders bewertet (Beispiele in
 "bas_evaluator_1 bis -//-_4")

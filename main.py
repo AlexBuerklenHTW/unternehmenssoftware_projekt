@@ -1,5 +1,6 @@
 import openai
 
+from agent.agent import start_conversation
 
 file_path = "API_KEY"
 openai.api_key = open(file_path, "r").read()
@@ -9,4 +10,4 @@ openai.api_key = open(file_path, "r").read()
 # zwei extremen gegeneinander laufen lassen
 
 
-conversation()
+start_conversation()

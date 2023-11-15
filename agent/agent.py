@@ -1,8 +1,12 @@
 import openai
 
 
-def agent_java(prompt):
-    response = openai.Completion.create(
+file_path = "API_KEY"
+openai.api_key = open(file_path, "r").read()
+
+
+def agent_java():
+    response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
             {"role": "system",
@@ -11,15 +15,13 @@ def agent_java(prompt):
                         "and that you can solve any problem with Java."},
             {"role": "assistant",
              "content": "You are ready to defend Java in an argument as best as you can"},
-            {"role": "user",
-             "content": prompt}
         ]
     )
     return response['choices'][0]['message']['content']
 
 
-def agent_python(prompt):
-    response = openai.Completion.create(
+def agent_python():
+    response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
             {"role": "system",
@@ -28,29 +30,27 @@ def agent_python(prompt):
                         "and that you can solve any problem with Python."},
             {"role": "assistant",
              "content": "You are ready to defend Python in an argument as best as you can"},
-            {"role": "user",
-             "content": prompt}
         ]
     )
     return response['choices'][0]['message']['content']
 
 
-def starter():
-    user_input = "What would be more suitable in the backend for developing an E-Commerce Platform? Java or Python?"
-    return user_input
+def start_conversation():
+    conversation = []
 
+    starter = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "user",
+             "content": "We need to build a E-Commerce platform, where we sell computer hardware. What programming language should we use for backend? Java or python?"},
+        ]
+    )
 
-def conversation():
-    user_prompt = starter()
+    # Continue the conversation
 
-    for _ in range(3):  # You can adjust the number of turns in the conversation
-        java_response = agent_java(user_prompt)
-        print(f"Java Expert: {java_response}")
+    conversation.append(starter)
+    conversation.append(agent_java())
+    conversation.append(agent_python())
 
-        python_response = agent_python(java_response)
-        print(f"Python Expert: {python_response}")
+    print(conversation)
 
-        user_prompt = python_response  # Set the user prompt to the last agent's response
-
-
-conversation()

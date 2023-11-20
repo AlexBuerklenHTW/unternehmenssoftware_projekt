@@ -1,5 +1,5 @@
-import openai
 import streamlit as st
+import openai
 
 # step-back-prompting
 # testen, ob name wirklich unterschied macht

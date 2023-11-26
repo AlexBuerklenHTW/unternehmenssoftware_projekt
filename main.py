@@ -8,21 +8,22 @@ agents_name_description = {}
 topic = []
 
 
-
 def main():
-    with st.sidebar:
-        st.header(
-            "Lets start a discussion! Enter a topic you want to discuss and create 3 agents. (Chat input is going to be available after creating agents)")
-        create_topic()
-        # st.write(topic)
-        create_agent_name_and_description()
-        # st.write(agents_name_description)
-    if st.session_state.stage_agent >= 4:
-        with st.chat_message("assistant"):
-            disable_chat_input()
-            agents(agents_name_description)
-    #st.chat_input("Say something", disabled=st.session_state["disabled_chat_input"])
+    chat()
+    # with st.sidebar:
+    #     st.header(
+    #         "Lets start a discussion! Enter a topic you want to discuss and create 3 agents. (Chat input is going to be available after creating agents)")
+    #     create_topic()
+    #     create_agent_name_and_description()
+    # if st.session_state.stage_agent >= 4:
+    #     with st.chat_message("assistant"):
+    #         #disable_chat_input()
+    #         agents(agents_name_description)
+    # # st.chat_input("Say something", disabled=st.session_state["disabled_chat_input"])
 
+
+if "messages" not in st.session_state:
+    st.session_state.messages = []
 
 if 'stage_agent' not in st.session_state:
     st.session_state.stage_agent = 0
@@ -109,13 +110,42 @@ def set_state():
     st.session_state.stage_agent += 1
 
 
+def chat():
+    # Display chat messages from history on app rerun
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
+
+    # Accept user input
+    if prompt := st.chat_input("What is up?"):
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        with st.chat_message("user"):
+            st.markdown(prompt)
+
+        with st.chat_message("assistant"):
+            message_placeholder = st.empty()
+            full_response = ""
+            for response in openai.ChatCompletion.create(
+                    model="gpt-3.5-turbo",
+                    messages=[
+                        {"role": m["role"], "content": m["content"]}
+                        for m in st.session_state.messages
+                    ],
+                    stream=True,
+            ):
+                full_response += response.choices[0].delta.get("content", "")
+                message_placeholder.markdown(full_response + "▌")
+            message_placeholder.markdown(full_response)
+        st.session_state.messages.append({"role": "assistant", "content": full_response})
+
+
 def agents(agents_dict):
     names = list(agents_dict.keys())
     description = list(agents_dict.values())
-    #temperature funktioniert irgendwie nicht. Assistant funktioniert irgendwie nicht, aber System läuft besser.
+    # temperature funktioniert irgendwie nicht. Assistant funktioniert irgendwie nicht, aber System läuft besser.
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
-        #temperature=0,
+        # temperature=0,
         messages=[
             {"role": "system",
              "content": f"name: {names[0]}.  description: {description[0]}. topic: {topic}"},

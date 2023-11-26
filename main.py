@@ -1,7 +1,3 @@
-# step-back-prompting
-# chromadb anschauen
-# max_tokens als limit setzen
-
 import openai
 import streamlit as st
 
@@ -10,6 +6,7 @@ openai.api_key = open(file_path, "r").read()
 
 agents_name_description = {}
 topic = []
+
 
 
 def main():

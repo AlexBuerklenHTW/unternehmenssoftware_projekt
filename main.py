@@ -16,7 +16,6 @@ def main():
         create_agent_name_and_description()
     if st.session_state.stage_agent >= 4:
         agents(agents_name_description)
-        st.write(st.session_state.messages)
         chat()
 
 
@@ -129,10 +128,13 @@ def chat():
                     ],
                     stream=True,
             ):
+
+                agents(agents_name_description)
                 full_response += response.choices[0].delta.get("content", "")
                 message_placeholder.markdown(full_response + "▌")
             message_placeholder.markdown(full_response)
         st.session_state.messages.append({"role": "assistant", "content": full_response})
+        st.write(st.session_state.messages)
 
 
 def agents(agents_dict):
@@ -142,28 +144,39 @@ def agents(agents_dict):
     # Auch funktioniert die Rollenverteilung der Agents viel besser.
     response_agent_1 = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
-        max_tokens=1000,
         messages=[
-            {"role": "user",
-             "content": f"Your name is: {names[0]}. Your description is: {description[0]}.The topic you going to discuss about: {topic}"}
+            {"role": "system",
+             "content": f"Your name is: {names[0]}. Your description/background is: {description[0]}.The topic you going to discuss about: {topic}"}
         ]
     )
     response_agent_2 = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
-        max_tokens=1000,
         messages=[
-            {"role": "user",
-             "content": f"Your name is: {names[1]}. Your description is: {description[1]}.The topic you going to discuss about: {topic}"}
+            {"role": "system",
+             "content": f"Your name is: {names[1]}. Your description/background is: {description[1]}.The topic you going to discuss about: {topic}"}
         ]
     )
     response_agent_3 = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
-        max_tokens=1000,
         messages=[
-            {"role": "user",
-             "content": f"Your name is: {names[2]}. Your description is: {description[2]}.The topic you going to discuss about: {topic}"}
+            {"role": "system",
+             "content": f"Your name is: {names[2]}. Your description/background is: {description[2]}.The topic you going to discuss about: {topic}"}
         ]
     )
+    # response = openai.ChatCompletion.create(
+    #     model="gpt-3.5-turbo",
+    #     messages=[
+    #         {"role": "system",
+    #          "content": f"Your name is: {names[0]}. Your description is: {description[0]}.The topic you going to discuss about: {topic}"},
+    #         {"role": "system",
+    #          "content": f"Your name is: {names[1]}. Your description is: {description[1]}.The topic you going to discuss about: {topic}"},
+    #         {"role": "system",
+    #          "content": f"Your name is: {names[2]}. Your description is: {description[2]}.The topic you going to discuss about: {topic}"}
+    #     ]
+    # )
+    # finished_response = response['choices'][0]['message']
+    # st.session_state.messages.append(finished_response)
+    # st.write(st.session_state.messages)
 
     finished_response_1 = response_agent_1['choices'][0]['message']
     finished_response_2 = response_agent_2['choices'][0]['message']
@@ -171,6 +184,7 @@ def agents(agents_dict):
     st.session_state.messages.append(finished_response_1)
     st.session_state.messages.append(finished_response_2)
     st.session_state.messages.append(finished_response_3)
+    st.write(st.session_state.messages)
 
 
 def create_topic():

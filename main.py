@@ -1,11 +1,15 @@
-import openai
 import streamlit as st
+import openai
+import database as db
+
+client = openai
 
 file_path = "API_KEY"
-openai.api_key = open(file_path, "r").read()
+client.api_key = open(file_path, "r").read()
 
 agents_name_description = {}
 topic = []
+
 
 
 def main():
@@ -15,8 +19,9 @@ def main():
         create_topic()
         create_agent_name_and_description()
     if st.session_state.stage_agent >= 4:
-        agents(agents_name_description)
-        chat()
+        # agents(agents_name_description)
+        agents_db(agents_name_description)
+        chat_db()
 
 
 if "messages" not in st.session_state:
@@ -26,7 +31,7 @@ for message in st.session_state.messages:
     with st.chat_message(message["role"]):
         st.markdown(message["content"])
 
-if 'stage_agent' not in st.session_state:
+if "stage_agent" not in st.session_state:
     st.session_state.stage_agent = 0
 
 if "disabled_topic" not in st.session_state:
@@ -112,7 +117,7 @@ def set_state():
 
 
 def chat():
-    if prompt := st.chat_input("Initialize the conversation!"):
+    if prompt := st.chat_input("Type something"):
         with st.chat_message("user"):
             st.markdown(prompt)
         st.session_state.messages.append({"role": "user", "content": prompt})
@@ -120,7 +125,7 @@ def chat():
         with st.chat_message("assistant"):
             message_placeholder = st.empty()
             full_response = ""
-            for response in openai.ChatCompletion.create(
+            for response in client.ChatCompletion.create(
                     model="gpt-3.5-turbo",
                     messages=[
                         {"role": m["role"], "content": m["content"]}
@@ -128,63 +133,97 @@ def chat():
                     ],
                     stream=True,
             ):
-
-                agents(agents_name_description)
                 full_response += response.choices[0].delta.get("content", "")
                 message_placeholder.markdown(full_response + "▌")
             message_placeholder.markdown(full_response)
         st.session_state.messages.append({"role": "assistant", "content": full_response})
-        st.write(st.session_state.messages)
+        # st.write(st.session_state.messages)
 
 
+def chat_db():
+    if prompt := st.chat_input("Type something"):
+        with st.chat_message("user"):
+            st.markdown(prompt)
+            db.collection.add(
+                ids=["id_prompt"],
+                documents=[prompt]
+            )
+
+        with st.chat_message("assistant"):
+            message_placeholder = st.empty()
+            full_response = ""
+
+            query = db.collection.query(query_texts=[prompt])
+            for inner_list in query["documents"]:
+                text = ", ".join(inner_list)
+
+
+            for response in client.ChatCompletion.create(
+                    model="gpt-3.5-turbo",
+                    messages=[{"role": "system",
+                              "content": text}],
+                    stream=True,
+            ):
+                full_response += response.choices[0].delta.get("content", "")
+                message_placeholder.markdown(full_response + "▌")
+
+            message_placeholder.markdown(full_response)
+
+        db.collection.add(
+            documents=[full_response],
+            ids=["id_response"]
+        )
+
+
+def run_once(f):
+    def wrapper(*args, **kwargs):
+        if not wrapper.has_run:
+            wrapper.has_run = True
+            return f(*args, **kwargs)
+
+    wrapper.has_run = False
+    return wrapper
+
+
+@run_once
 def agents(agents_dict):
     names = list(agents_dict.keys())
     description = list(agents_dict.values())
-    # Die Aufteilung in drei verschiedene completions dauert länger, jedoch ist es besser für die Speicherung in st.session_state.messages.
-    # Auch funktioniert die Rollenverteilung der Agents viel besser.
-    response_agent_1 = openai.ChatCompletion.create(
+    # extra role für topic. role: user und content {topic}
+    response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
             {"role": "system",
-             "content": f"Your name is: {names[0]}. Your description/background is: {description[0]}.The topic you going to discuss about: {topic}"}
-        ]
-    )
-    response_agent_2 = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=[
+             "content": f"You take the role of: {names[0]}. Your description is: {description[0]}.The topic you going to discuss about: {topic}"},
             {"role": "system",
-             "content": f"Your name is: {names[1]}. Your description/background is: {description[1]}.The topic you going to discuss about: {topic}"}
-        ]
-    )
-    response_agent_3 = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=[
+             "content": f"You take the role of: {names[1]}. Your description is: {description[1]}.The topic you going to discuss about: {topic}"},
             {"role": "system",
-             "content": f"Your name is: {names[2]}. Your description/background is: {description[2]}.The topic you going to discuss about: {topic}"}
+             "content": f"You take the role of: {names[2]}. Your description is: {description[2]}.The topic you going to discuss about: {topic}"}
         ]
     )
-    # response = openai.ChatCompletion.create(
-    #     model="gpt-3.5-turbo",
-    #     messages=[
-    #         {"role": "system",
-    #          "content": f"Your name is: {names[0]}. Your description is: {description[0]}.The topic you going to discuss about: {topic}"},
-    #         {"role": "system",
-    #          "content": f"Your name is: {names[1]}. Your description is: {description[1]}.The topic you going to discuss about: {topic}"},
-    #         {"role": "system",
-    #          "content": f"Your name is: {names[2]}. Your description is: {description[2]}.The topic you going to discuss about: {topic}"}
-    #     ]
-    # )
-    # finished_response = response['choices'][0]['message']
-    # st.session_state.messages.append(finished_response)
-    # st.write(st.session_state.messages)
+    finished_response = response['choices'][0]['message']
+    st.session_state.messages.append(finished_response)
 
-    finished_response_1 = response_agent_1['choices'][0]['message']
-    finished_response_2 = response_agent_2['choices'][0]['message']
-    finished_response_3 = response_agent_3['choices'][0]['message']
-    st.session_state.messages.append(finished_response_1)
-    st.session_state.messages.append(finished_response_2)
-    st.session_state.messages.append(finished_response_3)
-    st.write(st.session_state.messages)
+def agents_db(agents_dict):
+    names = list(agents_dict.keys())
+    description = list(agents_dict.values())
+    # extra role für topic. role: user und content {topic}
+    response = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system",
+             "content": f"You take the role of: {names[0]}. Your description is: {description[0]}.The topic you going to discuss about: {topic}"},
+            {"role": "system",
+             "content": f"You take the role of: {names[1]}. Your description is: {description[1]}.The topic you going to discuss about: {topic}"},
+            {"role": "system",
+             "content": f"You take the role of: {names[2]}. Your description is: {description[2]}.The topic you going to discuss about: {topic}"}
+        ]
+    )
+    db.collection.add(
+        documents=[response['choices'][0]['message']['content']],
+        ids=["id_agents"]
+    )
+
 
 
 def create_topic():

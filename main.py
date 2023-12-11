@@ -128,10 +128,11 @@ def chat_db():
             query = db.collection.query(query_texts=[prompt])
             for inner_list in query["documents"]:
                 text = ", ".join(inner_list)
-
+            # role system, wo der text ist funktioniert viel besser, als assistant
             for response in client.ChatCompletion.create(
                     model="gpt-3.5-turbo",
-                    messages=[{"role": "assistant", "content": text},
+                    temperature=0,
+                    messages=[{"role": "system", "content": text},
                               {"role": "user",
                                "content": prompt}],
                     stream=True,

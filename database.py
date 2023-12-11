@@ -4,6 +4,7 @@ chroma_client = db.Client()
 
 collection = chroma_client.get_or_create_collection(name="main_collection")
 
+
 # collection.add(
 #     ids=["id1", "id2", "id3"],
 #     documents=["This is a document", "This is another document", "industrie"]

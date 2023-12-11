@@ -3,7 +3,6 @@ import logging
 import streamlit as st
 import openai
 import database as db
-import logging as log
 
 client = openai
 
@@ -12,9 +11,6 @@ client.api_key = open(file_path, "r").read()
 
 agents_name_description = {}
 topic = []
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-
 
 def main():
     with st.sidebar:
@@ -23,7 +19,6 @@ def main():
         create_topic()
         create_agent_name_and_description()
     if st.session_state.stage_agent >= 4:
-        # agents(agents_name_description)
         agents_db(agents_name_description)
         chat_db()
 
@@ -120,38 +115,11 @@ def set_state():
     st.session_state.stage_agent += 1
 
 
-# def chat():
-#     if prompt := st.chat_input("Type something"):
-#         with st.chat_message("user"):
-#             st.markdown(prompt)
-#         st.session_state.messages.append({"role": "user", "content": prompt})
-#
-#         with st.chat_message("assistant"):
-#             message_placeholder = st.empty()
-#             full_response = ""
-#             for response in client.ChatCompletion.create(
-#                     model="gpt-3.5-turbo",
-#                     messages=[
-#                         {"role": m["role"], "content": m["content"]}
-#                         for m in st.session_state.messages
-#                     ],
-#                     stream=True,
-#             ):
-#                 full_response += response.choices[0].delta.get("content", "")
-#                 message_placeholder.markdown(full_response + "▌")
-#             message_placeholder.markdown(full_response)
-#         st.session_state.messages.append({"role": "assistant", "content": full_response})
-#          st.write(st.session_state.messages)
-
-
 def chat_db():
     if prompt := st.chat_input("Type something"):
+        st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.markdown(prompt)
-            # dbadd = db.collection.add(
-            #     ids=["id"],
-            #     documents=[prompt]
-            # )
 
         with st.chat_message("assistant"):
             message_placeholder = st.empty()
@@ -160,55 +128,28 @@ def chat_db():
             query = db.collection.query(query_texts=[prompt])
             for inner_list in query["documents"]:
                 text = ", ".join(inner_list)
-                st.write(text)
 
             for response in client.ChatCompletion.create(
                     model="gpt-3.5-turbo",
-                    messages=[{"role": "user", "content": text},
-                              {"role": "user", "content": prompt + "Bitte beantworte den Prompt oben auf Basis des Gesprächs."}],
+                    messages=[{"role": "assistant", "content": text},
+                              {"role": "user",
+                               "content": prompt}],
                     stream=True,
             ):
+                db.collection.add(
+                    documents=[full_response],
+                    ids=["id"]
+                )
                 full_response += response.choices[0].delta.get("content", "")
                 message_placeholder.markdown(full_response + "▌")
-
             message_placeholder.markdown(full_response)
+            st.session_state.messages.append({"role": "assistant", "content": full_response})
 
-        db.collection.add(
-            documents=[full_response],
-            ids=["id"]
-        )
+            print(db.collection.get("id"))
 
-
-# def run_once(f):
-#     def wrapper(*args, **kwargs):
-#         if not wrapper.has_run:
-#             wrapper.has_run = True
-#             return f(*args, **kwargs)
-#
-#     wrapper.has_run = False
-#     return wrapper
-#
-#
-# @run_once
-# def agents(agents_dict):
-#     names = list(agents_dict.keys())
-#     description = list(agents_dict.values())
-#     # extra role für topic. role: user und content {topic}
-#     response = openai.ChatCompletion.create(
-#         model="gpt-3.5-turbo",
-#         messages=[
-#             {"role": "assistant",
-#              "content": f"You take the role of: {names[0]}. Your description is: {description[0]}.The topic you going to discuss about: {topic}. Dont end the discussion. Only end discussion, if someone actually said so."},
-#             {"role": "assistant",
-#              "content": f"You take the role of: {names[1]}. Your description is: {description[1]}.The topic you going to discuss about: {topic}. Dont end the discussion. Only end discussion, if someone actually said so."},
-#             {"role": "assistant",
-#              "content": f"You take the role of: {names[2]}. Your description is: {description[2]}.The topic you going to discuss about: {topic}. Dont end the discussion. Only end discussion, if someone actually said so."}
-#         ]
-#     )
-#     finished_response = response['choices'][0]['message']
-#     st.session_state.messages.append(finished_response)
 
 def agents_db(agents_dict):
+    print(db.collection.get("id"))
     names = list(agents_dict.keys())
     description = list(agents_dict.values())
     # extra role für topic. role: user und content {topic}
@@ -216,17 +157,18 @@ def agents_db(agents_dict):
         model="gpt-3.5-turbo",
         messages=[
             {"role": "system",
-             "content": f"You take the role of: {names[0]}. Your description is: {description[0]}.The topic you going to discuss about: {topic}. Dont end the discussion. Only end discussion, if someone actually said so."},
+             "content": f"You take the role of: {names[0]}. Your description is: {description[0]}.The topic you going to discuss about: {topic}."},
             {"role": "system",
-             "content": f"You take the role of: {names[1]}. Your description is: {description[1]}.The topic you going to discuss about: {topic}. Dont end the discussion. Only end discussion, if someone actually said so."},
+             "content": f"You take the role of: {names[1]}. Your description is: {description[1]}.The topic you going to discuss about: {topic}."},
             {"role": "system",
-             "content": f"You take the role of: {names[2]}. Your description is: {description[2]}.The topic you going to discuss about: {topic}. Dont end the discussion. Only end discussion, if someone actually said so."}
+             "content": f"You take the role of: {names[2]}. Your description is: {description[2]}.The topic you going to discuss about: {topic}."}
         ]
     )
     db.collection.add(
         documents=[response['choices'][0]['message']['content']],
         ids=["id"]
     )
+    print(db.collection.get("id"))
 
 
 def create_topic():

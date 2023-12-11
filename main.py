@@ -145,30 +145,32 @@ def chat_db():
             message_placeholder.markdown(full_response)
             st.session_state.messages.append({"role": "assistant", "content": full_response})
 
-            print(db.collection.get("id"))
-
 
 def agents_db(agents_dict):
-    print(db.collection.get("id"))
+
     names = list(agents_dict.keys())
     description = list(agents_dict.values())
-    # extra role für topic. role: user und content {topic}
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
             {"role": "system",
-             "content": f"You take the role of: {names[0]}. Your description is: {description[0]}.The topic you going to discuss about: {topic}."},
+             "content": f"You take the role of: {names[0]}. Your description is: {description[0]}."
+                        f"The topic you going to discuss about: {topic}. You only gonna take position for your description and defend your position as best as you can."
+                        f"The point is, that the discussion should not be one sided, more back and forth."},
             {"role": "system",
-             "content": f"You take the role of: {names[1]}. Your description is: {description[1]}.The topic you going to discuss about: {topic}."},
+             "content": f"You take the role of: {names[1]}. Your description is: {description[1]}."
+                        f"The topic you going to discuss about: {topic}. You only gonna take position for your description and defend your position as best as you can."
+                        f"The point is, that the discussion should not be one sided, more back and forth."},
             {"role": "system",
-             "content": f"You take the role of: {names[2]}. Your description is: {description[2]}.The topic you going to discuss about: {topic}."}
+             "content": f"You take the role of: {names[2]}. Your description is: {description[2]}."
+                        f"The topic you going to discuss about: {topic}. You only gonna take position for your description and defend your position as best as you can."
+                        f"The point is, that the discussion should not be one sided, more back and forth."}
         ]
     )
     db.collection.add(
         documents=[response['choices'][0]['message']['content']],
         ids=["id"]
     )
-    print(db.collection.get("id"))
 
 
 def create_topic():

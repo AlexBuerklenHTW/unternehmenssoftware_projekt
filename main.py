@@ -9,7 +9,7 @@ chroma_client = db.Client()
 collection = chroma_client.get_or_create_collection(name="main_collection")
 
 file_path = "API_KEY"
-client.api_key = open(file_path, "r").read()
+client.api_key = st.secrets["api_key"]
 
 agents_name_description = {}
 topic = []
